@@ -50,7 +50,10 @@ func (fw *fileWatcher) Stop() {
 	close(fw.cancel)
 }
 
-func (fw *fileWatcher) MonitorUpdate() <-chan struct{} {
+// pools the filesystem to check for new upgrade currentInfo. currentName is the name
+// of currently running upgrade. The check is rejected if it finds an upgrade with the same
+// name.
+func (fw *fileWatcher) MonitorUpdate(currentName string) <-chan struct{} {
 	fw.ticker.Reset(fw.interval)
 	done := make(chan struct{})
 	fw.cancel = make(chan bool)
@@ -60,7 +63,7 @@ func (fw *fileWatcher) MonitorUpdate() <-chan struct{} {
 		for {
 			select {
 			case <-fw.ticker.C:
-				if fw.CheckUpdate() {
+				if fw.CheckUpdate(currentName) {
 					done <- struct{}{}
 				}
 			case <-fw.cancel:
@@ -72,7 +75,9 @@ func (fw *fileWatcher) MonitorUpdate() <-chan struct{} {
 }
 
 // CheckUpdate reads update plan from file and checks if there is a new update request
-func (fw *fileWatcher) CheckUpdate() bool {
+// currentName is the name of currently running upgrade. The check is rejected if it finds
+// an upgrade with the same name.
+func (fw *fileWatcher) CheckUpdate(currentName string) bool {
 	if fw.needsUpdate {
 		return true
 	}
@@ -89,7 +94,7 @@ func (fw *fileWatcher) CheckUpdate() bool {
 		// TODO: print error!
 		return false
 	}
-	if ui.Height > fw.currentInfo.Height {
+	if ui.Height > fw.currentInfo.Height && currentName != fw.currentInfo.Name {
 		fw.currentInfo = ui
 		fw.needsUpdate = true
 		return true
