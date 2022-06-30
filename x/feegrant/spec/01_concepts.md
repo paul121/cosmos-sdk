@@ -23,11 +23,11 @@ There are two types of fee allowances present at the moment:
 
 ## BasicAllowance
 
-`BasicAllowance` is permission for `grantee` to use fee from a `granter`'s account. If any of the `spend_limit` or `expiration` reaches its limit, the grant will be removed from the state.
+`BasicAllowance` is permission for `grantee` to use fee from a `granter`'s account. If the `expiration` reaches its limit, the grant will be removed from the state.
 
 +++ https://github.com/cosmos/cosmos-sdk/blob/691032b8be0f7539ec99f8882caecefc51f33d1f/proto/cosmos/feegrant/v1beta1/feegrant.proto#L13-L26
 
-- `spend_limit` is the limit of coins that are allowed to be used from the `granter` account. If it is empty, it assumes there's no spend limit, `grantee` can use any number of available tokens from `granter` account address before the expiration.
+- `spend_limit` is the limit of coins that are allowed to be used from the `granter` account for each transaction. If it is empty, it assumes there's no spend limit, `grantee` can use any number of available tokens from `granter` account address for each transaction.
 
 - `expiration` specifies an optional time when this allowance expires. If the value is left empty, there is no expiry for the grant.
 
